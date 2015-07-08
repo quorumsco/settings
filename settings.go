@@ -14,6 +14,10 @@ type TOMLConfig struct {
 
 var Default = TOMLConfig{
 	Components: map[string]interface{}{
+		"server": Server{
+			Host: "0.0.0.0",
+			Port: 8080,
+		},
 		"postgres": Postgres{
 			User:     "postgres",
 			Password: "postgres",
