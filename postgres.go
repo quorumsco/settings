@@ -1,6 +1,11 @@
 package settings
 
-import "fmt"
+import (
+	"encoding/json"
+	"fmt"
+
+	"github.com/iogo-framework/logs"
+)
 
 type Postgres struct {
 	DB       string
@@ -10,35 +15,36 @@ type Postgres struct {
 	Password string
 }
 
-func (config TOMLConfig) Postgres() Postgres {
-	var pDefault = Default.Components["postgres"].(Postgres)
+func (config Config) Postgres() (Postgres, error) {
+	var postgres Postgres
 
-	pConfig, ok := config.Components["postgres"].(Postgres)
-	if !ok {
-		return pDefault
+	err := json.Unmarshal(config.Components["postgres"], &postgres)
+	if err != nil {
+		logs.Warning("%s: %s", err.Error(), "missing or wrong 'postgres' configuration, ignoring")
 	}
 
-	if pConfig.DB == "" {
-		pConfig.DB = pDefault.DB
+	if postgres.DB == "" {
+		postgres.DB = "postgres"
+		logs.Warning("missing postgres 'db' configuration, assuming default value: 'postgres'")
+	}
+	if postgres.Host == "" {
+		postgres.Host = "postgres"
+		logs.Warning("missing postgres 'host' configuration, assuming default value: 'postgres'")
+	}
+	if postgres.Port == 0 {
+		postgres.Port = 5432
+		logs.Warning("missing postgres 'port' configuration, assuming default value: 5432")
+	}
+	if postgres.User == "" {
+		postgres.User = "postgres"
+		logs.Warning("missing postgres 'user' configuration, assuming default value: 'postgres'")
+	}
+	if postgres.Password == "" {
+		postgres.Password = "postgres"
+		logs.Warning("missing postgres 'password' configuration, assuming default value: 'postgres'")
 	}
 
-	if pConfig.Host == "" {
-		pConfig.Host = pDefault.Host
-	}
-
-	if pConfig.Port == 0 {
-		pConfig.Port = pDefault.Port
-	}
-
-	if pConfig.User == "" {
-		pConfig.User = pDefault.User
-	}
-
-	if pConfig.Password == "" {
-		pConfig.Password = pDefault.Password
-	}
-
-	return pConfig
+	return postgres, nil
 }
 
 func (p Postgres) String() string {

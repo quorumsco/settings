@@ -1,82 +1,87 @@
 package settings
 
 import (
+	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"os"
 
-	"github.com/naoina/toml"
+	"github.com/iogo-framework/logs"
 )
 
-type TOMLConfig struct {
-	Components map[string]interface{}
+type Config struct {
+	Components map[string]json.RawMessage
 	Settings   map[string]interface{}
 }
 
-var Default = TOMLConfig{
-	Components: map[string]interface{}{
-		"server": Server{
-			Host: "0.0.0.0",
-			Port: 8080,
-		},
-		"postgres": Postgres{
-			User:     "postgres",
-			Password: "postgres",
-			Host:     "0.0.0.0",
-			Port:     5432,
-			DB:       "postgres",
-		},
-		"sqlite3": Sqlite3{
-			Path: "/tmp/users.sqlite",
-		},
-		"redis": Redis{
-			Host: "redis",
-			Port: 6379,
-		},
-	},
-	Settings: map[string]interface{}{
-		"debug":   true,
-		"migrate": false,
-		"client":  "sqlite3",
-	},
-}
-
-func (config TOMLConfig) Client() string {
-	client, ok := config.Settings["client"].(string)
-	if client != "" && ok {
-		return client
+func (config Config) Debug() bool {
+	debug, ok := config.Settings["debug"].(bool)
+	if !ok {
+		return false
 	}
-	return Default.Settings["client"].(string)
+	return debug
 }
 
-func (config TOMLConfig) SqlDB() (dialect, args string) {
-	switch config.Client() {
+func (config Config) Migrate() bool {
+	debug, ok := config.Settings["migrate"].(bool)
+	if !ok {
+		return false
+	}
+	return debug
+}
+
+func (config Config) Dialect() (string, error) {
+	client, ok := config.Settings["database"].(string)
+	if ok && client != "" {
+		return client, nil
+	}
+	logs.Warning("missing 'database' configuration, assuming default value: 'sqlite3'")
+	return "sqlite3", nil
+}
+
+func (config Config) SqlDB() (dialect, args string, err error) {
+	dialect, err = config.Dialect()
+	if err != nil {
+		return
+	}
+
+	switch dialect {
 	case "postgres":
-		dialect = "postgres"
-		args = config.Postgres().String()
+		var postgres Postgres
+		postgres, err = config.Postgres()
+		if err != nil {
+			return
+		}
+		args = postgres.String()
 	case "sqlite3":
-		fallthrough
+		var sqlite Sqlite3
+		sqlite, err = config.Sqlite3()
+		if err != nil {
+			return
+		}
+		args = sqlite.String()
 	default:
-		dialect = "sqlite3"
-		args = config.Sqlite3().String()
+		err = fmt.Errorf("unknown sql dialect '%s'", dialect)
 	}
 	return
 }
 
-func Parse(file string) (TOMLConfig, error) {
+func Parse(file string) (Config, error) {
+	var config Config
+
 	f, err := os.Open(file)
 	if err != nil {
-		return Default, err
+		return config, err
 	}
 	defer f.Close()
 
 	buf, err := ioutil.ReadAll(f)
 	if err != nil {
-		return Default, err
+		return config, err
 	}
 
-	var config TOMLConfig
-	if err := toml.Unmarshal(buf, &config); err != nil {
-		return Default, err
+	if err := json.Unmarshal(buf, &config); err != nil {
+		return config, err
 	}
 
 	return config, nil
