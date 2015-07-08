@@ -8,34 +8,43 @@ import (
 )
 
 type TOMLConfig struct {
-	Debug    bool
-	Migrate  bool
-	Server   Server
-	Database map[string]interface{}
+	Components map[string]interface{}
+	Settings   map[string]interface{}
 }
 
 var Default = TOMLConfig{
-	Debug:   true,
-	Migrate: false,
-	Server: Server{
-		Host: "0.0.0.0",
-		Port: 8080,
+	Components: map[string]interface{}{
+		"postgres": Postgres{
+			User:     "postgres",
+			Password: "postgres",
+			Host:     "0.0.0.0",
+			Port:     5432,
+			DB:       "postgres",
+		},
+		"sqlite3": Sqlite3{
+			Path: "/tmp/users.sqlite",
+		},
+		"redis": Redis{
+			Host: "redis",
+			Port: 6379,
+		},
 	},
-	Database: map[string]interface{}{
-		"Client": "sqlite3",
-		"Path":   DefaultSqlite3.Path,
+	Settings: map[string]interface{}{
+		"debug":   true,
+		"migrate": false,
+		"client":  "sqlite3",
 	},
 }
 
 func (config TOMLConfig) Client() string {
-	client, ok := config.Database["client"].(string)
+	client, ok := config.Settings["client"].(string)
 	if client != "" && ok {
 		return client
 	}
-	return Default.Database["client"].(string)
+	return Default.Settings["client"].(string)
 }
 
-func (config TOMLConfig) DB() (dialect, args string) {
+func (config TOMLConfig) SqlDB() (dialect, args string) {
 	switch config.Client() {
 	case "postgres":
 		dialect = "postgres"

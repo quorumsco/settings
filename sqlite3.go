@@ -4,20 +4,16 @@ type Sqlite3 struct {
 	Path string
 }
 
-var DefaultSqlite3 = Sqlite3{
-	Path: "/tmp/users.sqlite",
-}
-
 func (s Sqlite3) String() string {
 	return s.Path
 }
 
 func (config TOMLConfig) Sqlite3() Sqlite3 {
-	var sq = DefaultSqlite3
+	var sDefault = Default.Components["sqlite3"].(Sqlite3)
 
-	path, ok := config.Database["path"].(string)
-	if path != "" && ok {
-		sq.Path = path
+	sConfig, ok := config.Components["sqlite3"].(Sqlite3)
+	if sConfig.Path == "" || !ok {
+		sConfig.Path = sDefault.Path
 	}
-	return sq
+	return sConfig
 }

@@ -10,43 +10,35 @@ type Postgres struct {
 	Password string
 }
 
-var DefaultPosgres = Postgres{
-	DB:       "postgres",
-	Host:     "postgres",
-	Port:     5432,
-	User:     "postgres",
-	Password: "postgres",
-}
-
 func (config TOMLConfig) Postgres() Postgres {
-	var pg = DefaultPosgres
+	var pDefault = Default.Components["postgres"].(Postgres)
 
-	db, ok := config.Database["db"].(string)
-	if db != "" && ok {
-		pg.DB = db
+	pConfig, ok := config.Components["postgres"].(Postgres)
+	if !ok {
+		return pDefault
 	}
 
-	host, ok := config.Database["host"].(string)
-	if host != "" && ok {
-		pg.Host = host
+	if pConfig.DB == "" {
+		pConfig.DB = pDefault.DB
 	}
 
-	port, ok := config.Database["port"].(int64)
-	if ok {
-		pg.Port = int(port)
+	if pConfig.Host == "" {
+		pConfig.Host = pDefault.Host
 	}
 
-	user, ok := config.Database["user"].(string)
-	if user != "" && ok {
-		pg.User = user
+	if pConfig.Port == 0 {
+		pConfig.Port = pDefault.Port
 	}
 
-	password, ok := config.Database["password"].(string)
-	if password != "" && ok {
-		pg.Password = password
+	if pConfig.User == "" {
+		pConfig.User = pDefault.User
 	}
 
-	return pg
+	if pConfig.Password == "" {
+		pConfig.Password = pDefault.Password
+	}
+
+	return pConfig
 }
 
 func (p Postgres) String() string {
