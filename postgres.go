@@ -40,6 +40,10 @@ func (config Config) Postgres() (Postgres, error) {
 		logs.Warning("missing postgres 'user' configuration, assuming default value: 'postgres'")
 	}
 
+	if postgres.Password == "" {
+		logs.Warning("missing postgres 'password' configuration, assuming no password is needed")
+	}
+
 	return postgres, nil
 }
 
