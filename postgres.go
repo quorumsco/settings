@@ -39,15 +39,15 @@ func (config Config) Postgres() (Postgres, error) {
 		postgres.User = "postgres"
 		logs.Warning("missing postgres 'user' configuration, assuming default value: 'postgres'")
 	}
-	if postgres.Password == "" {
-		postgres.Password = "postgres"
-		logs.Warning("missing postgres 'password' configuration, assuming default value: 'postgres'")
-	}
 
 	return postgres, nil
 }
 
 func (p Postgres) String() string {
+	if p.Password == "" {
+		return fmt.Sprintf("postgres://%s@%s:%d/%s?sslmode=disable",
+			p.User, p.Host, p.Port, p.DB)
+	}
 	return fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=disable",
 		p.User, p.Password, p.Host, p.Port, p.DB)
 }
