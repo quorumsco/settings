@@ -14,6 +14,22 @@ type Config struct {
 	Settings   map[string]interface{}
 }
 
+func (config Config) Int(setting string) int {
+	value, err := config.Settings[setting].(int)
+	if err {
+		return -1
+	}
+	return value
+}
+
+func (config Config) Bool(setting string) bool {
+	value, ok := config.Settings[setting].(bool)
+	if !ok {
+		return false
+	}
+	return value
+}
+
 func (config Config) Debug() bool {
 	debug, ok := config.Settings["debug"].(bool)
 	if !ok {
