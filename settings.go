@@ -15,10 +15,11 @@ type Config struct {
 }
 
 func (config Config) Int(setting string) int {
-	value, err := config.Settings[setting].(int)
-	if err {
+	src, ok := config.Settings[setting].(float64)
+	if !ok {
 		return -1
 	}
+	value := int(src)
 	return value
 }
 
