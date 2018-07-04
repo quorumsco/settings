@@ -50,8 +50,10 @@ func (config Config) Postgres() (Postgres, error) {
 func (p Postgres) String() string {
 	if p.Password == "" {
 		return fmt.Sprintf("postgres://%s@%s:%d/%s?sslmode=disable",
+			//return fmt.Sprintf("postgres://%s@%s:%d/%s?sslmode=require",
 			p.User, p.Host, p.Port, p.DB)
 	}
 	return fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=disable",
+		//return fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=require",
 		p.User, p.Password, p.Host, p.Port, p.DB)
 }
