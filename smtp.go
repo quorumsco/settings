@@ -4,15 +4,15 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/iogo-framework/logs"
+	"github.com/quorumsco/logs"
 )
 
 type Smtp struct {
-	Host     		string
-	Smtpserver  string
-	Port     		string
-	User     		string
-	Password 		string
+	Host       string
+	Smtpserver string
+	Port       string
+	User       string
+	Password   string
 }
 
 func (config Config) Smtp() (Smtp, error) {

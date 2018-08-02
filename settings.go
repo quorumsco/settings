@@ -6,7 +6,7 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/iogo-framework/logs"
+	"github.com/quorumsco/logs"
 )
 
 type Config struct {

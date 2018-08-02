@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/iogo-framework/logs"
+	"github.com/quorumsco/logs"
 )
 
 type Elasticsearch struct {

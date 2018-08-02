@@ -3,7 +3,7 @@ package settings
 import (
 	"encoding/json"
 
-	"github.com/iogo-framework/logs"
+	"github.com/quorumsco/logs"
 )
 
 type Sqlite3 struct {
