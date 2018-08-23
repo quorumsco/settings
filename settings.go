@@ -38,6 +38,13 @@ func (config Config) Debug() bool {
 	}
 	return debug
 }
+func (config Config) Env_webapp() string {
+	env, ok := config.Settings["env_webapp"].(string)
+	if !ok {
+		return ""
+	}
+	return env
+}
 
 func (config Config) Migrate() bool {
 	debug, ok := config.Settings["migrate"].(bool)
